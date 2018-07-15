@@ -5,8 +5,9 @@
 #include <QJsonDocument>
 #include <QString>
 #include <QProcess>
-#include <jcon/json_rpc_file_logger.h>
+
 #include <jcon/json_rpc_tcp_client.h>
+#include <jcon/json_rpc_debug_logger.h>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -14,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    auto logger = std::shared_ptr<jcon::JsonRpcDebugLogger>(new jcon::JsonRpcDebugLogger);
+    rpc_client = new jcon::JsonRpcTcpClient(this,logger);
 }
 
 MainWindow::~MainWindow()
@@ -70,9 +73,14 @@ void MainWindow::on_stopButton_clicked()
 
 void MainWindow::on_rpcButton_clicked()
 {
-    jcon::JsonRpcClient* rpc_client;
-    rpc_client = new jcon::JsonRpcTcpClient(this);
+    //jcon::JsonRpcClient* rpc_client;
+    if(rpc_client->isConnected()) {
+        rpc_client->disconnectFromServer();
+    }
     rpc_client->connectToServer("testnet.cloud.diynova.com",8900);
+    if(!rpc_client->isConnected()) {
+        return;
+    }
     auto req = rpc_client->callAsync("Math.Add", 10,20);
 
     req->connect(req.get(), &jcon::JsonRpcRequest::result,
@@ -85,4 +93,8 @@ void MainWindow::on_rpcButton_clicked()
                      qDebug() << "RPC error:" << message
                               << " (" << code << ")";
                  });
+}
+
+void MainWindow::on_MainWindow_destroyed()
+{
 }

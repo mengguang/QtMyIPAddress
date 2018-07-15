@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QtNetwork>
-
+#include <jcon/json_rpc_tcp_client.h>
 namespace Ui {
 class MainWindow;
 }
@@ -26,12 +26,15 @@ private slots:
 
     void on_rpcButton_clicked();
 
+    void on_MainWindow_destroyed();
+
 private:
     QByteArray data;
     QNetworkAccessManager qnam;
     QNetworkReply *reply;
     Ui::MainWindow *ui;
     QProcess ping;
+    jcon::JsonRpcClient* rpc_client;
 };
 
 #endif // MAINWINDOW_H
